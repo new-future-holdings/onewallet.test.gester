@@ -1,0 +1,16 @@
+query memberMe($id: ID) {
+  me {
+    id
+    username
+    ... on Member {
+      totalBalance
+      availableBalance
+    }
+  }
+}
+
+###
+
+mutation createMember($input: CreateMemberInput!) {
+  createMember(input: $input)
+}

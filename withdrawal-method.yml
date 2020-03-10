@@ -1,0 +1,54 @@
+url: "{{adminUrl}}"
+defs:
+  commonName: "{{$chance name}}"
+
+tasks:
+  duplicateWithdrawalMethod:
+    - import: authenticate.yml
+      task: authenticateAdmin
+      env:
+        adminUsername: admin11
+        adminPassword: password
+    - request: createWithdrawalMethod
+      options:
+        headers:
+          authorization: bearer {{response.admin.access}}
+      vars:
+        input:
+          name: "{{defs.commonName}}"
+          enabled: true
+          transactionFee: 100
+          transactionFeeType: ABSOLUTE
+          bank: ICBC
+          accountName: "John Doe2"
+          accountNumber: "{{$chance integer min:100000:number max:10000000:number as string}}"
+      assert:
+        data:
+          type: string
+    - request: createWithdrawalMethod
+      options:
+        headers:
+          authorization: bearer {{response.admin.access}}
+      vars:
+        input:
+          name: "{{$chance name}}"
+          enabled: true
+          transactionFee: 100
+          transactionFeeType: ABSOLUTE
+          bank: ICBC
+          accountName: "John Doe2"
+          accountNumber: "{{$chance integer min:100000:number max:10000000:number as string}}"
+      assert:
+        data:
+          type: string
+      as: toUpdate
+    - request: updateWithdrawalMethod
+      options:
+        headers:
+          authorization: bearer {{response.admin.access}}
+      vars:
+        id: "{{response.toUpdate}}"
+        input:
+          name: "{{defs.commonName}}"
+      assert:
+        error.0.original.original.withdrawalMethodNameInUse: true

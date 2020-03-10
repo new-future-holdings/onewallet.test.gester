@@ -1,0 +1,9 @@
+mutation createWithdrawalMethod($input: CreateOfflineBankTransferWithdrawalMethodInput) {
+  createOfflineBankTransferWithdrawalMethod(input: $input)
+}
+
+###
+
+mutation updateWithdrawalMethod($id: ID!, $input: UpdateOfflineBankTransferWithdrawalMethodInput) {
+  updateOfflineBankTransferWithdrawalMethod(id: $id, input: $input)
+}

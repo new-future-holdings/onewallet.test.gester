@@ -1,0 +1,85 @@
+mutation createPaymentMethod($type: PaymentMethodType!, $input: CreatePaymentMethodInput!) {
+  createPaymentMethod(type: $type, input: $input)
+}
+
+###
+
+mutation updatePaymentMethod($id: ID!, $input: UpdatePaymentMethodInput!) {
+  updatePaymentMethod(id: $id, input: $input)
+}
+
+###
+
+mutation deletePaymentMethod($id: ID!) {
+  deletePaymentMethod(id: $id)
+}
+
+###
+
+query paymentMethod($id: ID!) {
+  paymentMethod(id: $id) {
+    id
+    name
+    remarks
+    enabled
+    currentAccumulation
+    memberLoyaltyLevel {
+      id
+    }
+    excludedMemberLevel {
+      id
+    }
+    minimumDepositAmount
+    maximumDepositAmount
+    instructionText
+    maximumDepositAmountPerDay
+    depositExpiry
+    turnoverRequirementMultiplier
+    suggestedAmounts
+    transactionFee
+    transactionFeeType
+    updateable
+  }
+}
+
+###
+
+query availablePaymentMethods($first: Int, $after: Binary, $filter: AvailablePaymentMethodsFilterInput!) {
+  availablePaymentMethods(first: $first, after: $after, filter: $filter) {
+    totalCount
+    edges {
+      node {
+        id
+        name
+      }
+    }
+  }
+}
+
+###
+
+query paymentMethods($first: Int, $after: Binary, $filter: PaymentMethodsFilterInput) {
+  paymentMethods(first: $first, after: $after, filter: $filter) {
+    id
+    name
+    remarks
+    enabled
+    currentAccumulation
+    memberLoyaltyLevel {
+      id
+    }
+    excludedMemberLevel {
+      id
+    }
+    minimumDepositAmount
+    maximumDepositAmount
+    instructionText
+    maximumDepositAmountPerDay
+    depositExpiry
+    turnoverRequirementMultiplier
+    suggestedAmounts
+    transactionFee
+    transactionFeeType
+    updateable
+  }
+}

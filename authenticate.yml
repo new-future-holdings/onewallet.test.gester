@@ -1,0 +1,31 @@
+url: "{{authenticateUrl}}"
+tasks:
+  authenticateAdmin:
+    - method: GET
+      endpoint: authenticate
+      authorization:
+        username: "{{adminUsername}}"
+        password: "{{adminPassword}}"
+      as: admin
+      assert:
+        data.refresh:
+          type: string
+        data.access:
+          type: string
+      cacheKey: adminToken
+  authenticateMember:
+    - method: GET
+      endpoint: authenticate
+      authorization:
+        username: "{{memberUsername}}"
+        password: "{{memberPassword}}"
+      options:
+        headers:
+          admin-code: "{{adminCode}}"
+      as: member
+      assert:
+        data.refresh:
+          type: string
+        data.access:
+          type: string
+      cacheKey: memberToken

@@ -1,0 +1,7 @@
+default:
+  adminUrl: https://api-admin-development.aonewallet.com/graphql
+  authenticateUrl: https://api-authentication-development.aonewallet.com
+  siteUrl: https://api-site-development.aonewallet.com/graphql
+  adminUsername: admin11
+  adminPassword: password
+  adminCode: v908

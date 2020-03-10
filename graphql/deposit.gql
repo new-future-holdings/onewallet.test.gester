@@ -1,0 +1,104 @@
+mutation createDeposit($input: CreateDepositInput!) {
+  createDeposit(input: $input)
+}
+
+###
+
+mutation startProcessDeposit($id: ID!) {
+  startProcessDeposit(id: $id)
+}
+
+###
+
+mutation stopProcessDeposit($id: ID!) {
+  stopProcessDeposit(id: $id)
+}
+
+###
+
+mutation approveDeposit($id: ID!) {
+  approveDeposit(id: $id)
+}
+
+###
+
+mutation rejectDeposit($id: ID!) {
+  rejectDeposit(id: $id)
+}
+
+###
+
+mutation updateDeposit($id: ID!, $remarks: String!) {
+  updateDeposit(id: $id, remarks: $remarks)
+}
+
+###
+
+query memberDeposit($id: ID!) {
+  deposit(id: $id) {
+    id
+    amount
+    status
+    serialCode
+    paymentMethod
+    dateTimeCreated
+    dateTimeProcessed
+    paymentGatewayDepositDetails {
+      type
+      data
+      bankCode
+    }
+    depositorBank
+    depositorName
+    transactionReference
+  }
+}
+
+###
+
+query adminMemberDeposit($id: ID!) {
+  deposit(id: $id) {
+    id
+    amount
+    account
+    processingTime
+    paymentMethod
+    status
+    processor
+    serialCode
+    firstDeposit
+    remarks
+    dateTimeCreated
+    dateTimeProcessed
+
+    ... on OfflineBankTransferDeposit {
+      depositorBank
+      depositorName
+      transactionReference
+    }
+
+    ... on OnlineAlipayDeposit {
+      depositDetails {
+        type
+        info
+        bankCode
+      }
+    }
+
+    ... on OnlineWechatDeposit {
+      depositDetails {
+        type
+        info
+        bankCode
+      }
+    }
+
+    ... on OnlineBankTransferDeposit {
+      depositDetails {
+        type
+        info
+        bankCode
+      }
+    }
+  }
+}
