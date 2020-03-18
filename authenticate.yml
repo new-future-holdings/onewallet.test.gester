@@ -1,31 +1,39 @@
 url: "{{authenticateUrl}}"
 tasks:
   authenticateAdmin:
-    - method: GET
-      endpoint: authenticate
-      authorization:
-        username: "{{adminUsername}}"
-        password: "{{adminPassword}}"
-      as: admin
-      assert:
-        data.refresh:
-          type: string
-        data.access:
-          type: string
-      cacheKey: adminToken
+    description: Authenticate admin
+    steps:
+      - method: GET
+        endpoint: authenticate
+        params:
+          ttl: 900d
+        authorization:
+          username: "{{adminUsername}}"
+          password: "{{adminPassword}}"
+        as: admin
+        assert:
+          data.refresh:
+            type: string
+          data.access:
+            type: string
+        cacheKey: adminToken
   authenticateMember:
-    - method: GET
-      endpoint: authenticate
-      authorization:
-        username: "{{memberUsername}}"
-        password: "{{memberPassword}}"
-      options:
-        headers:
-          admin-code: "{{adminCode}}"
-      as: member
-      assert:
-        data.refresh:
-          type: string
-        data.access:
-          type: string
-      cacheKey: memberToken
+    description: Authenticate member
+    steps:
+      - method: GET
+        endpoint: authenticate
+        authorization:
+          username: "{{memberUsername}}"
+          password: "{{memberPassword}}"
+        params:
+          ttl: 900d
+        options:
+          headers:
+            admin-code: "{{adminCode}}"
+        as: member
+        assert:
+          data.refresh:
+            type: string
+          data.access:
+            type: string
+        cacheKey: memberToken

@@ -1,17 +1,20 @@
 tasks:
   createMember:
-    - import: authenticate.yml
-      as: admin
-      task: authenticateAdmin
-    - request: createMember
-      url: "{{adminUrl}}"
-      options:
-        headers:
-          authorization: bearer {{response.admin.access}}
-      vars:
-        input:
-          username: "{{$chance word length:6:number}}"
-          password: password
-      assert:
-        data:
-          type: string
+    description: Create member
+    steps:
+      - import: authenticate.yml
+        as: admin
+        task: authenticateAdmin
+      - request: createMember
+        url: "{{adminUrl}}"
+        options:
+          headers:
+            authorization: bearer {{response.admin.access}}
+        vars:
+          input:
+            username: "{{memberUsername}}"
+            password: password
+        cacheKey: member{{memberUsername}}
+        assert:
+          data:
+            type: string

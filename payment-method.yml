@@ -6,110 +6,143 @@ defs:
   memberLoyaltyId: "mll_{{$chance string pool:abcdef123456790:string length:32:number}}"
 
 tasks:
-  createOfflinePaymentMethod:
-    - import: authenticate.yml
-      task: authenticateAdmin
-    - import: member-loyalty.yml
-      task: createMemberLoyalty
-      env:
-        memberLoyaltyId: "{{defs.memberLoyaltyId}}"
-      as: memberLoyaltyProgramme
-    - request: createMember
-      options:
-        headers:
-          authorization: bearer {{response.admin.access}}
-      vars:
-        input:
-          username: "{{defs.memberUsername}}"
-          password: "{{defs.memberPassword}}"
-          memberLoyaltyProgramme: "{{response.memberLoyaltyProgramme}}"
-          memberLoyaltyLevel: "{{defs.memberLoyaltyId}}"
-      assert:
-        data:
-          type: string
-    - request: createPaymentMethod
-      options:
-        headers:
-          authorization: bearer {{response.admin.access}}
-      vars:
-        input:
-          name: "{{$chance word length:6:number}}"
-          enabled: true
-          memberLoyaltyLevel:
-            - "{{defs.memberLoyaltyId}}"
-          excludedMemberLevel: []
-          minimumDepositAmount: 10
-          maximumDepositAmount: 10000
-          maximumDepositAmountPerDay: 100000
-          depositExpiry: 20
-          turnoverRequirementMultiplier: 1
-          suggestedAmounts:
-            - 10
-          transactionFee: 100
-          transactionFeeType: ABSOLUTE
-          allowCustomAmount: true
-          bank: ABC
-          accountNumber: "{{$chance word length:12:number}}"
-          accountName: "{{$chance name}}"
-        type: OFFLINE_BANK_TRANSFER
-      as: paymentMethod
-      assert:
-        data:
-          type: string
-    - import: authenticate.yml
-      task: authenticateMember
-      env:
-        memberUsername: "{{defs.memberUsername}}"
-        memberPassword: "{{defs.memberPassword}}"
-    - request: availablePaymentMethods
-      url: "{{siteUrl}}"
-      options:
-        headers:
-          authorization: bearer {{response.member.access}}
-          admin-code: "{{adminCode}}"
-      vars:
-        filter:
-          paymentMethodType:
-            eq: OFFLINE_BANK_TRANSFER
-      assert:
-        data.edges:
-          type: array
-          subset:
-            - node:
-                id: "{{response.paymentMethod}}"
-    - request: updatePaymentMethod
-      options:
-        headers:
-          authorization: bearer {{response.admin.access}}
-      vars:
-        id: "{{response.paymentMethod}}"
-        input:
-          memberLoyaltyLevel: []
-      assert:
-        data:
-          value: true
-    - request: paymentMethod
-      options:
-        headers:
-          authorization: bearer {{response.admin.access}}
-      vars:
-        id: "{{response.paymentMethod}}"
-      assert:
-        data.memberLoyaltyLevel:
-          value: []
-    - request: availablePaymentMethods
-      url: "{{siteUrl}}"
-      options:
-        headers:
-          authorization: bearer {{response.member.access}}
-          admin-code: "{{adminCode}}"
-      vars:
-        filter:
-          paymentMethodType:
-            eq: OFFLINE_BANK_TRANSFER
-      assert:
-        data.edges:
-          type: array
-          subset:
-            - node:
-                id: "{{response.paymentMethod}}"
+  createPaymentMethod:
+    description: Create Payment Method
+    steps:
+      - import: authenticate.yml
+        task: authenticateAdmin
+      - request: createPaymentMethod
+        options:
+          headers:
+            authorization: bearer {{response.admin.access}}
+        vars:
+          input:
+            name: "{{$chance word length:6:number}}"
+            enabled: true
+            memberLoyaltyLevel:
+              - "{{defs.memberLoyaltyId}}"
+            excludedMemberLevel: []
+            minimumDepositAmount: 10
+            maximumDepositAmount: 10000
+            maximumDepositAmountPerDay: 100000
+            depositExpiry: 20
+            turnoverRequirementMultiplier: 1
+            suggestedAmounts:
+              - 10
+            transactionFee: 100
+            transactionFeeType: ABSOLUTE
+            allowCustomAmount: true
+            bank: ABC
+            accountNumber: "{{$chance word length:12:number}}"
+            accountName: "{{$chance name}}"
+          type:
+
+  memberAvailablePaymentMethod:
+    description: Ensure payment method listed after updating payment method's member loyalty to empty
+    steps:
+      - import: authenticate.yml
+        task: authenticateAdmin
+      - import: member-loyalty.yml
+        task: createMemberLoyalty
+        env:
+          memberLoyaltyId: "{{defs.memberLoyaltyId}}"
+        as: memberLoyaltyProgramme
+      - request: createMember
+        options:
+          headers:
+            authorization: bearer {{response.admin.access}}
+        vars:
+          input:
+            username: "{{defs.memberUsername}}"
+            password: "{{defs.memberPassword}}"
+            memberLoyaltyProgramme: "{{response.memberLoyaltyProgramme}}"
+            memberLoyaltyLevel: "{{defs.memberLoyaltyId}}"
+        assert:
+          data:
+            type: string
+      - request: createPaymentMethod
+        options:
+          headers:
+            authorization: bearer {{response.admin.access}}
+        vars:
+          input:
+            name: "{{$chance word length:6:number}}"
+            enabled: true
+            memberLoyaltyLevel:
+              - "{{defs.memberLoyaltyId}}"
+            excludedMemberLevel: []
+            minimumDepositAmount: 10
+            maximumDepositAmount: 10000
+            maximumDepositAmountPerDay: 100000
+            depositExpiry: 20
+            turnoverRequirementMultiplier: 1
+            suggestedAmounts:
+              - 10
+            transactionFee: 100
+            transactionFeeType: ABSOLUTE
+            allowCustomAmount: true
+            bank: ABC
+            accountNumber: "{{$chance word length:12:number}}"
+            accountName: "{{$chance name}}"
+          type: OFFLINE_BANK_TRANSFER
+        as: paymentMethod
+        assert:
+          data:
+            type: string
+      - import: authenticate.yml
+        task: authenticateMember
+        env:
+          memberUsername: "{{defs.memberUsername}}"
+          memberPassword: "{{defs.memberPassword}}"
+      - request: availablePaymentMethods
+        url: "{{siteUrl}}"
+        options:
+          headers:
+            authorization: bearer {{response.member.access}}
+            admin-code: "{{adminCode}}"
+        vars:
+          filter:
+            paymentMethodType:
+              eq: OFFLINE_BANK_TRANSFER
+        assert:
+          data.edges:
+            type: array
+            subset:
+              - node:
+                  id: "{{response.paymentMethod}}"
+      - request: updatePaymentMethod
+        options:
+          headers:
+            authorization: bearer {{response.admin.access}}
+        vars:
+          id: "{{response.paymentMethod}}"
+          input:
+            memberLoyaltyLevel: []
+        assert:
+          data:
+            value: true
+      - request: paymentMethod
+        options:
+          headers:
+            authorization: bearer {{response.admin.access}}
+        vars:
+          id: "{{response.paymentMethod}}"
+        assert:
+          data.memberLoyaltyLevel:
+            value: []
+      - request: availablePaymentMethods
+        url: "{{siteUrl}}"
+        options:
+          headers:
+            authorization: bearer {{response.member.access}}
+            admin-code: "{{adminCode}}"
+        vars:
+          filter:
+            paymentMethodType:
+              eq: OFFLINE_BANK_TRANSFER
+        assert:
+          data.edges:
+            type: array
+            subset:
+              - node:
+                  id: "{{response.paymentMethod}}"

@@ -1,0 +1,4 @@
+mutation createDepositProvider($input: CreateDepositProviderInput!, $type: DepositProviderType!) {
+  createDepositProvider(input: $input, type: $type)
+}
+

@@ -1,0 +1,23 @@
+url: "{{adminUrl}}"
+
+tasks:
+  createDepositProvider:
+    description: Create deposit createDepositProvider
+    steps:
+      - import: authenticate.yml
+        task: authenticateAdmin
+      - request: createDepositProvider
+        options:
+          headers:
+            authorization: bearer {{response.admin.access}}
+        vars:
+          input:
+            name: "{{$chance name}}"
+            merchantCode: "{{merchantCode}}"
+            key: "{{key}}"
+          type: "{{type}}"
+        as: depositProvider
+        cacheKey: "{{adminCode}}{{merchantCode}}{{key}}{{type}}"
+        assert:
+          data:
+            type: string

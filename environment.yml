@@ -5,3 +5,12 @@ default:
   adminUsername: admin11
   adminPassword: password
   adminCode: v908
+
+demo:
+  adminUrl: https://api-admin-demo.aonewallet.com/graphql
+  authenticateUrl: https://api-authentication-demo.aonewallet.com
+  siteUrl: https://api-site-demo.aonewallet.com/graphql
+  adminUsername: admin04
+  adminPassword: password
+  adminCode: k494
+  memberPassword: password
