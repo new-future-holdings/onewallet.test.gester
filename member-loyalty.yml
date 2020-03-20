@@ -19,7 +19,7 @@ tasks:
                 inviteOnly: true
                 sameAsQualificationCriteria: false
                 color: "#777777"
-        as: memberLoyalty
+        as: memberLoyaltyProgramme
         assert:
           data:
             type: string

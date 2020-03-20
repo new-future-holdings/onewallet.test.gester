@@ -4,7 +4,7 @@ defs:
   memberUsername: "{{$chance word length:6:number}}"
   memberPassword: "{{$chance word length:6:number}}"
   memberLoyaltyId: "mll_{{$chance string pool:abcdef123456790:string length:32:number}}"
-
+  paymentMethodType: ONLINE_BANK_TRANSFER
 tasks:
   createPaymentMethod:
     description: Create Payment Method
@@ -37,6 +37,69 @@ tasks:
             accountName: "{{$chance name}}"
           type:
 
+  memberOnlineBankTransferPaymentMethod:
+    description: Ensure online online bank transfer are visible
+    steps:
+      - import: authenticate.yml
+        task: authenticateAdmin
+      - import: deposit-provider.yml
+        task: createDiorpayDepositProvider
+        env:
+          type: DIORPAY
+          merchantCode: "100802"
+          key: 8D08314E40262DEC502F480610967403
+      - request: createPaymentMethod
+        options:
+          headers:
+            authorization: bearer {{response.admin.access}}
+        url: "{{adminUrl}}"
+        vars:
+          input:
+            name: "{{$chance word length:6:number}}"
+            enabled: true
+            memberLoyaltyLevel: []
+            excludedMemberLevel: []
+            minimumDepositAmount: 100
+            maximumDepositAmount: 50000
+            maximumDepositAmountPerDay: 100000
+            depositExpiry: 200
+            turnoverRequirementMultiplier: 1
+            suggestedAmounts: []
+            transactionFee: 100
+            transactionFeeType: ABSOLUTE
+            allowCustomAmount: true
+            depositProvider: "{{response.depositProvider}}"
+          type: "{{defs.paymentMethodType}}"
+        as: paymentMethod
+        cacheKey: "{{defs.paymentMethodType}}"
+        assert:
+          data:
+            type: string
+      - import: member.yml
+        task: createMember
+        env:
+          memberUsername: "{{defs.memberUsername}}"
+      - import: authenticate.yml
+        task: authenticateMember
+        env:
+          memberUsername: "{{defs.memberUsername}}"
+      - request: availablePaymentMethods
+        url: "{{siteUrl}}"
+        options:
+          headers:
+            authorization: bearer {{response.member.access}}
+            admin-code: "{{adminCode}}"
+        vars:
+          filter:
+            paymentMethodType:
+              eq: ONLINE_BANK_TRANSFER
+          first: 100
+        assert:
+          data.edges:
+            type: array
+            subset:
+              - node:
+                  id: "{{response.paymentMethod}}"
   memberAvailablePaymentMethod:
     description: Ensure payment method listed after updating payment method's member loyalty to empty
     steps:
@@ -46,7 +109,6 @@ tasks:
         task: createMemberLoyalty
         env:
           memberLoyaltyId: "{{defs.memberLoyaltyId}}"
-        as: memberLoyaltyProgramme
       - request: createMember
         options:
           headers:

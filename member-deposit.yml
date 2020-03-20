@@ -1,8 +1,8 @@
 defs:
   memberUsername: "{{$chance word length:6:number}}"
   memberPassword: password
-  paymentChannel: ALIPAY
-  paymentMethodType: ONLINE_ALIPAY
+  paymentChannel: WECHAT
+  paymentMethodType: ONLINE_WECHAT
 tasks:
   memberDepositDiorPay:
     description: Create deposit
@@ -10,7 +10,7 @@ tasks:
       - import: authenticate.yml
         task: authenticateAdmin
       - import: deposit-provider.yml
-        task: createDepositProvider
+        task: createDiorpayDepositProvider
         env:
           type: DIORPAY
           merchantCode: "100802"
@@ -64,3 +64,100 @@ tasks:
         assert:
           data:
             type: string
+  memberManualDeposit:
+    steps:
+      - import: authenticate.yml
+        task: authenticateAdmin
+      - request: createPaymentMethod
+        options:
+          headers:
+            authorization: bearer {{response.admin.access}}
+        url: "{{adminUrl}}"
+        vars:
+          input:
+            name: "{{$chance word length:6:number}}"
+            enabled: true
+            memberLoyaltyLevel: []
+            excludedMemberLevel: []
+            minimumDepositAmount: 100
+            maximumDepositAmount: 50000
+            maximumDepositAmountPerDay: 100000
+            depositExpiry: 200
+            turnoverRequirementMultiplier: 1
+            suggestedAmounts: []
+            transactionFee: 100
+            transactionFeeType: ABSOLUTE
+            allowCustomAmount: true
+            bank: ABC
+            accountNumber: "{{$chance word length:12:number}}"
+            accountName: "{{$chance name}}"
+          type: OFFLINE_BANK_TRANSFER
+        as: paymentMethod
+        assert:
+          data:
+            type: string
+      - import: member.yml
+        task: createMember
+        env:
+          memberUsername: "{{defs.memberUsername}}"
+      - import: authenticate.yml
+        task: authenticateMember
+        env:
+          memberUsername: "{{defs.memberUsername}}"
+      - request: createDeposit
+        url: "{{siteUrl}}"
+        options:
+          headers:
+            admin-code: "{{adminCode}}"
+            authorization: bearer {{response.member.access}}
+        vars:
+          input:
+            amount: 1000
+            paymentMethod: "{{response.paymentMethod}}"
+        as: deposit
+        assert:
+          data:
+            type: string
+      - request: submitDeposit
+        url: "{{siteUrl}}"
+        options:
+          headers:
+            admin-code: "{{adminCode}}"
+            authorization: bearer {{response.member.access}}
+        vars:
+          id: "{{response.deposit}}"
+          input:
+            alreadyDeposited: true
+        assert:
+          data:
+            value: true
+      - request: startProcessDeposit
+        options:
+          headers:
+            authorization: bearer {{response.admin.access}}
+        assert:
+          data:
+            value: true
+        url: "{{adminUrl}}"
+        vars:
+          id: "{{response.deposit}}"
+      - request: approveDeposit
+        options:
+          headers:
+            authorization: bearer {{response.admin.access}}
+        url: "{{adminUrl}}"
+        vars:
+          id: "{{response.deposit}}"
+        assert:
+          data:
+            value: true
+      - request: paymentMethod
+        url: "{{adminUrl}}"
+        options:
+          headers:
+            authorization: bearer {{response.admin.access}}
+        vars:
+          id: "{{response.paymentMethod}}"
+        assert:
+          data.currentAccumulation:
+            value: 1000

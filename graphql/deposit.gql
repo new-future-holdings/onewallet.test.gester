@@ -28,6 +28,12 @@ mutation rejectDeposit($id: ID!) {
 
 ###
 
+mutation submitDeposit($id: ID!, $input: SubmitDepositInput!) {
+  submitDeposit(id: $id, input: $input)
+}
+
+###
+
 mutation updateDeposit($id: ID!, $remarks: String!) {
   updateDeposit(id: $id, remarks: $remarks)
 }

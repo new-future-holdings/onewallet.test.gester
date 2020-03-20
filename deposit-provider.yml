@@ -1,12 +1,12 @@
 url: "{{adminUrl}}"
 
 tasks:
-  createDepositProvider:
-    description: Create deposit createDepositProvider
+  createDiorpayDepositProvider:
+    name: Create deposit createDiorpayDepositProvider
     steps:
       - import: authenticate.yml
         task: authenticateAdmin
-      - request: createDepositProvider
+      - request: createDiorpayDepositProvider
         options:
           headers:
             authorization: bearer {{response.admin.access}}
