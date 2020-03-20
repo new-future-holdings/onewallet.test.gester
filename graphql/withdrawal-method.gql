@@ -1,5 +1,5 @@
-mutation createWithdrawalMethod($input: CreateOfflineBankTransferWithdrawalMethodInput) {
-  createOfflineBankTransferWithdrawalMethod(input: $input)
+mutation createWithdrawalMethod($input: CreateOnlineWithdrawalMethodInput) {
+  createOnlineAlipayWithdrawalMethod(input: $input)
 }
 
 ###

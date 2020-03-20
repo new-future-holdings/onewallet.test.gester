@@ -1,0 +1,8 @@
+mutation createWithdrawalProvider($input: CreateWithdrawalProviderInput!) {
+  createWithdrawalProvider(input: $input)
+}
+
+###
+mutation deleteWithdrawalProvider($id: ID!) {
+  deleteWithdrawalProvider(id: $id)
+}

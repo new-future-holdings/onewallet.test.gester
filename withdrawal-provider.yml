@@ -1,0 +1,48 @@
+defs:
+  withdrawalProviderName: "{{$chance name length:6:number}}"
+
+url: "{{adminUrl}}"
+
+tasks:
+  disallowDeleteWithdrawalProvider:
+    steps:
+      - import: authenticate.yml
+        task: authenticateAdmin
+      - request: createWithdrawalProvider
+        options:
+          headers:
+            authorization: bearer {{response.admin.access}}
+        vars:
+          input:
+            name: "{{defs.withdrawalProviderName}}"
+            type: DIORPAY
+            merchantCode: "100802"
+            key: 8D08314E40262DEC502F480610967403
+        as: withdrawalProvider
+        cacheKey: "withdrawal-provider-{{defs.withdrawalProviderName}}"
+        assert:
+          data:
+            type: string
+      - request: createWithdrawalMethod
+        options:
+          headers:
+            authorization: bearer {{response.admin.access}}
+        vars:
+          input:
+            name: "{{$chance name length:6:number}}"
+            enabled: true
+            transactionFee: 100
+            transactionFeeType: ABSOLUTE
+            withdrawalProvider: "{{response.withdrawalProvider}}"
+        assert:
+          data:
+            type: string
+      - request: deleteWithdrawalProvider
+        options:
+          headers:
+            authorization: bearer {{response.admin.access}}
+        vars:
+          id: "{{response.withdrawalProvider}}"
+        assert:
+          error.0.original.original.withdrawalProviderInUse:
+            value: true
